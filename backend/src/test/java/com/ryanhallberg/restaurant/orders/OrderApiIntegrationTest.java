@@ -47,7 +47,7 @@ class OrderApiIntegrationTest {
         var response = mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email": "admin@sageandember.example", "password": "admin123"}
+                                {"email": "admin@porkfiction.example", "password": "admin123"}
                                 """))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();

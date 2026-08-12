@@ -80,14 +80,14 @@ class AuthFlowIntegrationTest {
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email": "admin@sageandember.example", "password": "wrong"}
+                                {"email": "admin@porkfiction.example", "password": "wrong"}
                                 """))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void seededAdminCanCreateMenuItemsCustomerCannot() throws Exception {
-        var adminToken = tokenFor("admin@sageandember.example", "admin123");
+        var adminToken = tokenFor("admin@porkfiction.example", "admin123");
 
         var itemBody = """
                 {"categoryId": 1, "name": "Test Special", "description": "Integration test dish",
@@ -165,7 +165,7 @@ class AuthFlowIntegrationTest {
 
     @Test
     void adminListAndStatusTransitionsWork() throws Exception {
-        var adminToken = tokenFor("admin@sageandember.example", "admin123");
+        var adminToken = tokenFor("admin@porkfiction.example", "admin123");
 
         mockMvc.perform(get("/api/v1/reservations").header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk());

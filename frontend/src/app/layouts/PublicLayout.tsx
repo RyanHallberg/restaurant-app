@@ -21,7 +21,7 @@ export default function PublicLayout() {
     .at(-1)
 
   useEffect(() => {
-    document.title = title ? `${title} · Sage & Ember` : 'Sage & Ember'
+    document.title = title ? `${title} · Pork Fiction` : 'Pork Fiction'
   }, [title])
 
   return (
@@ -29,7 +29,7 @@ export default function PublicLayout() {
       <header className="sticky top-0 z-10 border-b border-charcoal/10 bg-cream/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <NavLink to="/" className="font-display text-2xl tracking-tight">
-            Sage &amp; Ember
+            Pork Fiction
           </NavLink>
           <nav className="flex items-center gap-6 text-sm">
             <NavLink to="/" className={navClass} end>
@@ -80,8 +80,10 @@ export default function PublicLayout() {
       <footer className="border-t border-charcoal/10 bg-charcoal text-cream/80">
         <div className="mx-auto grid max-w-5xl gap-6 px-4 py-10 sm:grid-cols-3">
           <div>
-            <p className="font-display text-lg text-cream">Sage &amp; Ember</p>
-            <p className="mt-2 text-sm">Wood-fired seasonal cooking.</p>
+            <p className="font-display text-lg text-cream">Pork Fiction</p>
+            <p className="mt-2 text-sm">
+              Making vegetarians question their life choices since 2026.
+            </p>
           </div>
           <div className="text-sm">
             <h2 className="font-medium text-cream">Hours</h2>

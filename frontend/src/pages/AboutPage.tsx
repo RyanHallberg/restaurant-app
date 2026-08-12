@@ -1,11 +1,11 @@
 export default function AboutPage() {
   return (
     <section className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="font-display text-4xl">About Sage &amp; Ember</h1>
+      <h1 className="font-display text-4xl">About Pork Fiction</h1>
       <p className="mt-6 leading-relaxed text-charcoal/80">
-        Sage &amp; Ember is a neighborhood restaurant built around a single wood-fired hearth. Our
-        menu changes with the seasons and with what our farm partners bring through the back door —
-        but the char, the smoke, and the hospitality stay constant.
+        Pork Fiction is a neighborhood restaurant built around a single wood-fired hearth. Our menu
+        changes with the seasons and with what our farm partners bring through the back door — but
+        the char, the smoke, and the hospitality stay constant.
       </p>
       <p className="mt-4 leading-relaxed text-charcoal/80">
         This is a demo application: every dish, review, and reservation here is fictional, built as
@@ -20,7 +20,7 @@ export default function AboutPage() {
         <div>
           <h2 className="font-medium">Contact</h2>
           <p className="mt-2 text-charcoal/70">418 Garland Ave</p>
-          <p className="text-charcoal/70">(555) 014-2276 · hello@sageandember.example</p>
+          <p className="text-charcoal/70">(555) 014-2276 · hello@porkfiction.example</p>
         </div>
       </div>
     </section>

@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(info = @Info(
         title = "Restaurant API",
         version = "v1",
-        description = "API for the Sage & Ember mock restaurant: menu, reservations, ordering, admin."))
+        description = "API for the Pork Fiction mock restaurant: menu, reservations, ordering, admin."))
 @SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
 public class OpenApiConfig {
 }

@@ -4,10 +4,9 @@ export default function HomePage() {
   return (
     <section className="mx-auto max-w-5xl px-4 py-24 text-center">
       <p className="text-sm uppercase tracking-[0.3em] text-sage-dark">Est. 2026</p>
-      <h1 className="font-display mt-4 text-5xl tracking-tight sm:text-6xl">Sage &amp; Ember</h1>
+      <h1 className="font-display mt-4 text-5xl tracking-tight sm:text-6xl">Pork Fiction</h1>
       <p className="mx-auto mt-6 max-w-xl text-lg text-charcoal/70">
-        Wood-fired, seasonal cooking built around local farms — served in a warm room, or at your
-        table at home.
+        Making vegetarians question their life choices since 2026.
       </p>
       <div className="mt-10 flex justify-center gap-4">
         <Link
