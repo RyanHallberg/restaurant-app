@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AdminListData, AdminListResponses, AvailabilityData, AvailabilityResponses, CancelData, CancelResponses, CreateCategoryData, CreateCategoryResponses, CreateData, CreateItemData, CreateItemResponses, CreateResponses, DeleteItemData, DeleteItemResponses, GetItemData, GetItemResponses, ListCategoriesData, ListCategoriesResponses, ListItemsData, ListItemsResponses, LoginData, LoginResponses, MeData, MeResponses, MyReservationsData, MyReservationsResponses, RegisterData, RegisterResponses, UpdateCategoryData, UpdateCategoryResponses, UpdateItemData, UpdateItemResponses, UpdateStatusData, UpdateStatusResponses } from './types.gen';
+import type { AdminListData, AdminListResponses, AvailabilityData, AvailabilityResponses, CancelData, CancelResponses, CreateCategoryData, CreateCategoryResponses, CreateData, CreateItemData, CreateItemResponses, CreateOrderData, CreateOrderResponses, CreateResponses, DeleteItemData, DeleteItemResponses, GetItemData, GetItemResponses, GetOrderData, GetOrderResponses, ListCategoriesData, ListCategoriesResponses, ListItemsData, ListItemsResponses, ListMyOrdersData, ListMyOrdersResponses, ListOrdersData, ListOrdersResponses, LoginData, LoginResponses, MeData, MeResponses, MyReservationsData, MyReservationsResponses, RegisterData, RegisterResponses, UpdateCategoryData, UpdateCategoryResponses, UpdateItemData, UpdateItemResponses, UpdateOrderStatusData, UpdateOrderStatusResponses, UpdateStatusData, UpdateStatusResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -28,7 +28,7 @@ export const deleteItem = <ThrowOnError extends boolean = false>(options: Option
 });
 
 /**
- * Get a single menu item
+ * Get a single menu item; admins can also fetch hidden items
  */
 export const getItem = <ThrowOnError extends boolean = false>(options: Options<GetItemData, ThrowOnError>): RequestResult<GetItemResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetItemResponses, unknown, ThrowOnError>({ url: '/api/v1/menu/items/{id}', ...options });
 
@@ -86,6 +86,28 @@ export const cancel = <ThrowOnError extends boolean = false>(options: Options<Ca
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/reservations/{id}/cancel',
     ...options
+});
+
+/**
+ * List orders, filterable by status (admin)
+ */
+export const listOrders = <ThrowOnError extends boolean = false>(options?: Options<ListOrdersData, ThrowOnError>): RequestResult<ListOrdersResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListOrdersResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/orders',
+    ...options
+});
+
+/**
+ * Place an order; prices are recomputed server-side. 402 when the mock card declines
+ */
+export const createOrder = <ThrowOnError extends boolean = false>(options: Options<CreateOrderData, ThrowOnError>): RequestResult<CreateOrderResponses, unknown, ThrowOnError> => (options.client ?? client).post<CreateOrderResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/orders',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -162,6 +184,19 @@ export const updateStatus = <ThrowOnError extends boolean = false>(options: Opti
 });
 
 /**
+ * Advance an order through PLACED -> PREPARING -> READY -> COMPLETED, or cancel (admin)
+ */
+export const updateOrderStatus = <ThrowOnError extends boolean = false>(options: Options<UpdateOrderStatusData, ThrowOnError>): RequestResult<UpdateOrderStatusResponses, unknown, ThrowOnError> => (options.client ?? client).patch<UpdateOrderStatusResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/orders/{id}/status',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * The caller's reservations
  */
 export const myReservations = <ThrowOnError extends boolean = false>(options?: Options<MyReservationsData, ThrowOnError>): RequestResult<MyReservationsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MyReservationsResponses, unknown, ThrowOnError>({
@@ -174,6 +209,24 @@ export const myReservations = <ThrowOnError extends boolean = false>(options?: O
  * List 30-minute seating slots for a date with availability
  */
 export const availability = <ThrowOnError extends boolean = false>(options: Options<AvailabilityData, ThrowOnError>): RequestResult<AvailabilityResponses, unknown, ThrowOnError> => (options.client ?? client).get<AvailabilityResponses, unknown, ThrowOnError>({ url: '/api/v1/reservations/availability', ...options });
+
+/**
+ * A single order (owner or admin)
+ */
+export const getOrder = <ThrowOnError extends boolean = false>(options: Options<GetOrderData, ThrowOnError>): RequestResult<GetOrderResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetOrderResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/orders/{id}',
+    ...options
+});
+
+/**
+ * The caller's orders, newest first
+ */
+export const listMyOrders = <ThrowOnError extends boolean = false>(options?: Options<ListMyOrdersData, ThrowOnError>): RequestResult<ListMyOrdersResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListMyOrdersResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/orders/my',
+    ...options
+});
 
 /**
  * The authenticated user's profile

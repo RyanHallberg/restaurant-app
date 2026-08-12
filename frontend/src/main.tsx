@@ -8,12 +8,16 @@ import './api/client'
 import { queryClient } from './app/queryClient'
 import { router } from './app/router'
 import { useAuthStore } from './features/auth/authStore'
+import { useCartStore } from './features/ordering/cartStore'
 
 // Any identity change (login or logout) must drop cached server data: the same
 // query keys serve different results per role (e.g. the menu list includes
 // hidden items for admins), so a stale cache would leak across sessions.
+// The cart clears on LOGOUT only — clearing on login would empty a guest's
+// cart mid guest -> sign-in -> checkout flow.
 useAuthStore.subscribe((state, prev) => {
   if (state.token !== prev.token) queryClient.clear()
+  if (prev.token && !state.token) useCartStore.getState().clear()
 })
 
 createRoot(document.getElementById('root')!).render(

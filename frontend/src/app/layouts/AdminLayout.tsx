@@ -23,6 +23,9 @@ export default function AdminLayout() {
           <NavLink to="/admin/reservations" className={adminNavClass}>
             Reservations
           </NavLink>
+          <NavLink to="/admin/orders" className={adminNavClass}>
+            Orders
+          </NavLink>
         </nav>
       </aside>
       <div className="min-w-0">

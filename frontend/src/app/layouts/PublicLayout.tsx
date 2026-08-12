@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { NavLink, Outlet, ScrollRestoration, useMatches } from 'react-router'
 import type { RouteHandle } from '../router'
 import { useAuthStore } from '../../features/auth/authStore'
+import { selectCartCount, useCartStore } from '../../features/ordering/cartStore'
 
 function navClass({ isActive }: { isActive: boolean }) {
   return isActive
@@ -12,6 +13,7 @@ function navClass({ isActive }: { isActive: boolean }) {
 export default function PublicLayout() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
+  const cartCount = useCartStore(selectCartCount)
   const matches = useMatches()
   const title = matches
     .map((match) => (match.handle as RouteHandle | undefined)?.title)
@@ -41,6 +43,13 @@ export default function PublicLayout() {
             </NavLink>
             <NavLink to="/about" className={navClass}>
               About
+            </NavLink>
+            <NavLink
+              to="/cart"
+              className={navClass}
+              aria-label={`Cart, ${cartCount} item${cartCount === 1 ? '' : 's'}`}
+            >
+              Cart{cartCount > 0 && ` (${cartCount})`}
             </NavLink>
             {user?.role === 'ADMIN' && (
               <NavLink to="/admin" className={navClass}>

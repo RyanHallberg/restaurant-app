@@ -12,6 +12,10 @@ import RegisterPage from '../features/auth/pages/RegisterPage'
 import DashboardPage from '../features/admin/pages/DashboardPage'
 import AdminMenuPage from '../features/admin/pages/AdminMenuPage'
 import AdminReservationsPage from '../features/admin/pages/AdminReservationsPage'
+import AdminOrdersPage from '../features/admin/pages/AdminOrdersPage'
+import CartPage from '../features/ordering/pages/CartPage'
+import CheckoutPage from '../features/ordering/pages/CheckoutPage'
+import OrderStatusPage from '../features/ordering/pages/OrderStatusPage'
 
 export type RouteHandle = { title?: string }
 
@@ -37,6 +41,22 @@ export const router = createBrowserRouter([
         handle: { title: 'Create account' } satisfies RouteHandle,
       },
       { path: '/about', element: <AboutPage />, handle: { title: 'About' } satisfies RouteHandle },
+      { path: '/cart', element: <CartPage />, handle: { title: 'Cart' } satisfies RouteHandle },
+      {
+        element: <RequireAuth />,
+        children: [
+          {
+            path: '/checkout',
+            element: <CheckoutPage />,
+            handle: { title: 'Checkout' } satisfies RouteHandle,
+          },
+          {
+            path: '/orders/:orderId',
+            element: <OrderStatusPage />,
+            handle: { title: 'Your order' } satisfies RouteHandle,
+          },
+        ],
+      },
       {
         element: <RequireAuth role="ADMIN" />,
         children: [
@@ -57,6 +77,11 @@ export const router = createBrowserRouter([
                 path: '/admin/reservations',
                 element: <AdminReservationsPage />,
                 handle: { title: 'Admin · Reservations' } satisfies RouteHandle,
+              },
+              {
+                path: '/admin/orders',
+                element: <AdminOrdersPage />,
+                handle: { title: 'Admin · Orders' } satisfies RouteHandle,
               },
             ],
           },

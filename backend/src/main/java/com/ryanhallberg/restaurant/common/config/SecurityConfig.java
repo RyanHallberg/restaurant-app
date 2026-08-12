@@ -61,6 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/menu/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/reservations").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/reservations/*/status").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/*/status").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));

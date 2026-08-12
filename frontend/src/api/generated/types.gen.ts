@@ -53,6 +53,37 @@ export type ReservationResponse = {
     confirmationCode?: string;
 };
 
+export type CreateOrderRequest = {
+    items: Array<OrderLineRequest>;
+    payment: PaymentRequest;
+};
+
+export type OrderLineRequest = {
+    menuItemId: number;
+    quantity?: number;
+};
+
+export type PaymentRequest = {
+    cardNumber: string;
+    expiry: string;
+    cvc: string;
+};
+
+export type OrderLineResponse = {
+    itemName?: string;
+    priceCents?: number;
+    quantity?: number;
+};
+
+export type OrderResponse = {
+    id?: number;
+    status?: string;
+    totalCents?: number;
+    paymentReference?: string;
+    createdAt?: string;
+    items?: Array<OrderLineResponse>;
+};
+
 export type RegisterRequest = {
     email: string;
     password: string;
@@ -81,6 +112,10 @@ export type UpdateReservationStatusRequest = {
     status: string;
 };
 
+export type UpdateOrderStatusRequest = {
+    status: string;
+};
+
 export type PageResponseReservationResponse = {
     content?: Array<ReservationResponse>;
     page?: number;
@@ -97,6 +132,14 @@ export type AvailabilityResponse = {
 export type SlotResponse = {
     time?: string;
     available?: boolean;
+};
+
+export type PageResponseOrderResponse = {
+    content?: Array<OrderResponse>;
+    page?: number;
+    size?: number;
+    totalElements?: number;
+    totalPages?: number;
 };
 
 export type PageResponseMenuItemResponse = {
@@ -244,6 +287,52 @@ export type CancelResponses = {
 
 export type CancelResponse = CancelResponses[keyof CancelResponses];
 
+export type ListOrdersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        status?: 'PLACED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED';
+        /**
+         * Zero-based page index (0..N)
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         */
+        size?: number;
+        /**
+         * Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.
+         */
+        sort?: Array<string>;
+    };
+    url: '/api/v1/orders';
+};
+
+export type ListOrdersResponses = {
+    /**
+     * OK
+     */
+    200: PageResponseOrderResponse;
+};
+
+export type ListOrdersResponse = ListOrdersResponses[keyof ListOrdersResponses];
+
+export type CreateOrderData = {
+    body: CreateOrderRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/orders';
+};
+
+export type CreateOrderResponses = {
+    /**
+     * Created
+     */
+    201: OrderResponse;
+};
+
+export type CreateOrderResponse = CreateOrderResponses[keyof CreateOrderResponses];
+
 export type ListItemsData = {
     body?: never;
     path?: never;
@@ -372,6 +461,24 @@ export type UpdateStatusResponses = {
 
 export type UpdateStatusResponse = UpdateStatusResponses[keyof UpdateStatusResponses];
 
+export type UpdateOrderStatusData = {
+    body: UpdateOrderStatusRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/v1/orders/{id}/status';
+};
+
+export type UpdateOrderStatusResponses = {
+    /**
+     * OK
+     */
+    200: OrderResponse;
+};
+
+export type UpdateOrderStatusResponse = UpdateOrderStatusResponses[keyof UpdateOrderStatusResponses];
+
 export type MyReservationsData = {
     body?: never;
     path?: never;
@@ -418,6 +525,53 @@ export type AvailabilityResponses = {
 };
 
 export type AvailabilityResponse2 = AvailabilityResponses[keyof AvailabilityResponses];
+
+export type GetOrderData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/v1/orders/{id}';
+};
+
+export type GetOrderResponses = {
+    /**
+     * OK
+     */
+    200: OrderResponse;
+};
+
+export type GetOrderResponse = GetOrderResponses[keyof GetOrderResponses];
+
+export type ListMyOrdersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Zero-based page index (0..N)
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         */
+        size?: number;
+        /**
+         * Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.
+         */
+        sort?: Array<string>;
+    };
+    url: '/api/v1/orders/my';
+};
+
+export type ListMyOrdersResponses = {
+    /**
+     * OK
+     */
+    200: PageResponseOrderResponse;
+};
+
+export type ListMyOrdersResponse = ListMyOrdersResponses[keyof ListMyOrdersResponses];
 
 export type MeData = {
     body?: never;

@@ -7,6 +7,11 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+    properties:
+      hibernate:
+        # Batch lazy collection loads (e.g. order items on paged order lists)
+        # instead of one SELECT per parent row.
+        default_batch_fetch_size: 20
   flyway:
     # Prod runs only real migrations. The local profile adds db/seed (dev admin).
     locations: classpath:db/migration

@@ -45,6 +45,14 @@ public class MenuService {
         return PageResponse.from(page.map(MenuService::toResponse));
     }
 
+    /** Cross-feature lookup for order pricing: only available items count. */
+    public List<MenuItemResponse> listAvailableByIds(java.util.Collection<Long> ids) {
+        return itemRepository.findAllById(ids).stream()
+                .filter(MenuItem::isAvailable)
+                .map(MenuService::toResponse)
+                .toList();
+    }
+
     public MenuItemResponse getItem(long id, boolean includeUnavailable) {
         return itemRepository.findById(id)
                 // Non-admins must not reach a hidden item by addressing its id

@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { adminList, availability, cancel, create, createCategory, createItem, deleteItem, getItem, listCategories, listItems, login, me, myReservations, type Options, register, updateCategory, updateItem, updateStatus } from '../sdk.gen';
-import type { AdminListData, AdminListResponse, AvailabilityData, AvailabilityResponse2, CancelData, CancelResponse, CreateCategoryData, CreateCategoryResponse, CreateData, CreateItemData, CreateItemResponse, CreateResponse, DeleteItemData, DeleteItemResponse, GetItemData, GetItemResponse, ListCategoriesData, ListCategoriesResponse, ListItemsData, ListItemsResponse, LoginData, LoginResponse, MeData, MeResponse, MyReservationsData, MyReservationsResponse, RegisterData, RegisterResponse, UpdateCategoryData, UpdateCategoryResponse, UpdateItemData, UpdateItemResponse, UpdateStatusData, UpdateStatusResponse } from '../types.gen';
+import { adminList, availability, cancel, create, createCategory, createItem, createOrder, deleteItem, getItem, getOrder, listCategories, listItems, listMyOrders, listOrders, login, me, myReservations, type Options, register, updateCategory, updateItem, updateOrderStatus, updateStatus } from '../sdk.gen';
+import type { AdminListData, AdminListResponse, AvailabilityData, AvailabilityResponse2, CancelData, CancelResponse, CreateCategoryData, CreateCategoryResponse, CreateData, CreateItemData, CreateItemResponse, CreateOrderData, CreateOrderResponse, CreateResponse, DeleteItemData, DeleteItemResponse, GetItemData, GetItemResponse, GetOrderData, GetOrderResponse, ListCategoriesData, ListCategoriesResponse, ListItemsData, ListItemsResponse, ListMyOrdersData, ListMyOrdersResponse, ListOrdersData, ListOrdersResponse, LoginData, LoginResponse, MeData, MeResponse, MyReservationsData, MyReservationsResponse, RegisterData, RegisterResponse, UpdateCategoryData, UpdateCategoryResponse, UpdateItemData, UpdateItemResponse, UpdateOrderStatusData, UpdateOrderStatusResponse, UpdateStatusData, UpdateStatusResponse } from '../types.gen';
 
 /**
  * Delete a menu item (admin); prefer toggling available=false to preserve history
@@ -59,7 +59,7 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
 export const getItemQueryKey = (options: Options<GetItemData>) => createQueryKey('getItem', options);
 
 /**
- * Get a single menu item
+ * Get a single menu item; admins can also fetch hidden items
  */
 export const getItemOptions = (options: Options<GetItemData>) => queryOptions<GetItemResponse, DefaultError, GetItemResponse, ReturnType<typeof getItemQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -209,6 +209,71 @@ export const cancelMutation = (options?: Partial<Options<CancelData>>): UseMutat
     const mutationOptions: UseMutationOptions<CancelResponse, DefaultError, Options<CancelData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await cancel({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listOrdersQueryKey = (options?: Options<ListOrdersData>) => createQueryKey('listOrders', options);
+
+/**
+ * List orders, filterable by status (admin)
+ */
+export const listOrdersOptions = (options?: Options<ListOrdersData>) => queryOptions<ListOrdersResponse, DefaultError, ListOrdersResponse, ReturnType<typeof listOrdersQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listOrders({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listOrdersQueryKey(options)
+});
+
+export const listOrdersInfiniteQueryKey = (options?: Options<ListOrdersData>): QueryKey<Options<ListOrdersData>> => createQueryKey('listOrders', options, true);
+
+/**
+ * List orders, filterable by status (admin)
+ */
+export const listOrdersInfiniteOptions = (options?: Options<ListOrdersData>) => {
+    const opts = infiniteQueryOptions<ListOrdersResponse, DefaultError, InfiniteData<ListOrdersResponse>, QueryKey<Options<ListOrdersData>>, number | Pick<QueryKey<Options<ListOrdersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListOrdersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listOrders({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listOrdersInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Place an order; prices are recomputed server-side. 402 when the mock card declines
+ */
+export const createOrderMutation = (options?: Partial<Options<CreateOrderData>>): UseMutationOptions<CreateOrderResponse, DefaultError, Options<CreateOrderData>> => {
+    const mutationOptions: UseMutationOptions<CreateOrderResponse, DefaultError, Options<CreateOrderData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createOrder({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -370,6 +435,23 @@ export const updateStatusMutation = (options?: Partial<Options<UpdateStatusData>
     return mutationOptions;
 };
 
+/**
+ * Advance an order through PLACED -> PREPARING -> READY -> COMPLETED, or cancel (admin)
+ */
+export const updateOrderStatusMutation = (options?: Partial<Options<UpdateOrderStatusData>>): UseMutationOptions<UpdateOrderStatusResponse, DefaultError, Options<UpdateOrderStatusData>> => {
+    const mutationOptions: UseMutationOptions<UpdateOrderStatusResponse, DefaultError, Options<UpdateOrderStatusData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateOrderStatus({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const myReservationsQueryKey = (options?: Options<MyReservationsData>) => createQueryKey('myReservations', options);
 
 /**
@@ -435,6 +517,72 @@ export const availabilityOptions = (options: Options<AvailabilityData>) => query
     },
     queryKey: availabilityQueryKey(options)
 });
+
+export const getOrderQueryKey = (options: Options<GetOrderData>) => createQueryKey('getOrder', options);
+
+/**
+ * A single order (owner or admin)
+ */
+export const getOrderOptions = (options: Options<GetOrderData>) => queryOptions<GetOrderResponse, DefaultError, GetOrderResponse, ReturnType<typeof getOrderQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getOrder({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getOrderQueryKey(options)
+});
+
+export const listMyOrdersQueryKey = (options?: Options<ListMyOrdersData>) => createQueryKey('listMyOrders', options);
+
+/**
+ * The caller's orders, newest first
+ */
+export const listMyOrdersOptions = (options?: Options<ListMyOrdersData>) => queryOptions<ListMyOrdersResponse, DefaultError, ListMyOrdersResponse, ReturnType<typeof listMyOrdersQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMyOrders({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMyOrdersQueryKey(options)
+});
+
+export const listMyOrdersInfiniteQueryKey = (options?: Options<ListMyOrdersData>): QueryKey<Options<ListMyOrdersData>> => createQueryKey('listMyOrders', options, true);
+
+/**
+ * The caller's orders, newest first
+ */
+export const listMyOrdersInfiniteOptions = (options?: Options<ListMyOrdersData>) => {
+    const opts = infiniteQueryOptions<ListMyOrdersResponse, DefaultError, InfiniteData<ListMyOrdersResponse>, QueryKey<Options<ListMyOrdersData>>, number | Pick<QueryKey<Options<ListMyOrdersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListMyOrdersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listMyOrders({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listMyOrdersInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const meQueryKey = (options?: Options<MeData>) => createQueryKey('me', options);
 
