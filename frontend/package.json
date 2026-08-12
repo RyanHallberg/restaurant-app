@@ -12,7 +12,8 @@
     "test": "vitest run",
     "typecheck": "tsc -b --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.99.0",
+    "@playwright/test": "1.62.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query-devtools": "^5.101.4",
     "@testing-library/jest-dom": "^7.0.1",

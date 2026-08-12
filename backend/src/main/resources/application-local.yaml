@@ -14,4 +14,7 @@ spring:
 app:
   cors:
     allowed-origins:
-      - http://localhost:5173
+      - http://localhost:5173 # Vite dev server
+      # Compose full-stack profile (nginx). Same-origin POSTs still carry an
+      # Origin header, so the CORS filter must know this one too.
+      - http://localhost:8081

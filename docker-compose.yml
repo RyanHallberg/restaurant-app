@@ -16,5 +16,36 @@ services:
       timeout: 3s
       retries: 10
 
+  # Full-stack profile: `docker compose --profile full up --build` runs the
+  # whole app in containers (web on :8081). Day-to-day dev keeps the faster
+  # inner loop: compose runs only postgres; the API and Vite run on the host.
+  # Stop a host API on :8080 before using the profile.
+  api:
+    build: ./backend
+    profiles: ["full"]
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/restaurant
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # Slim JRE image has neither curl nor wget; a TCP handshake suffices.
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/8080'"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  web:
+    build: ./frontend
+    profiles: ["full"]
+    ports:
+      - "8081:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
 volumes:
   postgres-data:
