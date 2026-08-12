@@ -1,0 +1,110 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# One deploy at a time; a new push queues rather than killing a mid-flight rollout.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - run: ./mvnw -B verify
+
+  frontend-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  deploy-backend:
+    needs: [backend-test, frontend-test]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      # Keyless: GitHub's OIDC token is exchanged for github-deployer
+      # credentials via Workload Identity Federation. No JSON keys anywhere.
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev --quiet
+      - name: Build and push image
+        env:
+          IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT }}/restaurant/api:${{ github.sha }}
+        run: |
+          docker build -t "$IMAGE" backend
+          docker push "$IMAGE"
+      # Image-only update: scaling, secrets, Cloud SQL attachment, and env vars
+      # were established once on the service and persist across deploys.
+      - uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: restaurant-api
+          region: ${{ vars.GCP_REGION }}
+          image: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT }}/restaurant/api:${{ github.sha }}
+
+  deploy-frontend:
+    # Backend first: if a push changes the API contract and the UI together,
+    # the new frontend must never meet the old backend.
+    needs: [deploy-backend]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+      - run: npm ci
+      - name: Build with production API URL
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: npm run build
+      # firebase-tools authenticates via the ADC file that auth@v3 exports.
+      # Pinned: this is the one tool that must run with live credentials, so it
+      # doesn't get to float to whatever was published this morning.
+      - name: Deploy to Firebase Hosting
+        run: npx -y firebase-tools@15.26.0 deploy --only hosting --project ${{ vars.GCP_PROJECT }} --non-interactive

@@ -1,9 +1,8 @@
 name: CI
 
+# PRs only: pushes to main run the Deploy workflow, which gates on the same tests.
 on:
   pull_request:
-  push:
-    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
