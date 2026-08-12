@@ -4,6 +4,35 @@ export type ClientOptions = {
     baseUrl: 'http://localhost:8080' | (string & {});
 };
 
+export type CreateReservationRequest = {
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    partySize?: number;
+    date: string;
+    time: string;
+};
+
+export type ReservationResponse = {
+    id?: number;
+    customerName?: string;
+    partySize?: number;
+    date?: string;
+    time?: string;
+    status?: string;
+    confirmationCode?: string;
+};
+
+export type AvailabilityResponse = {
+    date?: string;
+    slots?: Array<SlotResponse>;
+};
+
+export type SlotResponse = {
+    time?: string;
+    available?: boolean;
+};
+
 export type MenuItemResponse = {
     id?: number;
     categoryId?: number;
@@ -27,6 +56,40 @@ export type MenuCategoryResponse = {
     name?: string;
     displayOrder?: number;
 };
+
+export type CreateData = {
+    body: CreateReservationRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reservations';
+};
+
+export type CreateResponses = {
+    /**
+     * Created
+     */
+    201: ReservationResponse;
+};
+
+export type CreateResponse = CreateResponses[keyof CreateResponses];
+
+export type AvailabilityData = {
+    body?: never;
+    path?: never;
+    query: {
+        date: string;
+    };
+    url: '/api/v1/reservations/availability';
+};
+
+export type AvailabilityResponses = {
+    /**
+     * OK
+     */
+    200: AvailabilityResponse;
+};
+
+export type AvailabilityResponse2 = AvailabilityResponses[keyof AvailabilityResponses];
 
 export type ListItemsData = {
     body?: never;

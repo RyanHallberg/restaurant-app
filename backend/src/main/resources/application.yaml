@@ -18,6 +18,9 @@ management:
         include: health
 
 app:
+  # The restaurant's business timezone. All "is this slot in the past" logic
+  # runs on this zone, never the JVM default (UTC in containers).
+  timezone: America/Chicago
   reservations:
     tables-per-slot: 10
     slot-minutes: 30

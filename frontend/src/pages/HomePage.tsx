@@ -11,16 +11,16 @@ export default function HomePage() {
       </p>
       <div className="mt-10 flex justify-center gap-4">
         <Link
-          to="/menu"
+          to="/reserve"
           className="rounded-md bg-ember px-6 py-3 text-cream transition-colors hover:bg-ember-dark"
         >
-          View the menu
+          Reserve a table
         </Link>
         <Link
-          to="/about"
+          to="/menu"
           className="rounded-md border border-charcoal/20 px-6 py-3 transition-colors hover:border-charcoal/40"
         >
-          About us
+          View the menu
         </Link>
       </div>
     </section>

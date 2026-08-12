@@ -33,6 +33,9 @@ export default function PublicLayout() {
             <NavLink to="/menu" className={navClass}>
               Menu
             </NavLink>
+            <NavLink to="/reserve" className={navClass}>
+              Reserve
+            </NavLink>
             <NavLink to="/about" className={navClass}>
               About
             </NavLink>

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetItemData, GetItemResponses, ListCategoriesData, ListCategoriesResponses, ListItemsData, ListItemsResponses } from './types.gen';
+import type { AvailabilityData, AvailabilityResponses, CreateData, CreateResponses, GetItemData, GetItemResponses, ListCategoriesData, ListCategoriesResponses, ListItemsData, ListItemsResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,6 +17,23 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * Book a table; returns a confirmation code. 409 when the slot is full
+ */
+export const create = <ThrowOnError extends boolean = false>(options: Options<CreateData, ThrowOnError>): RequestResult<CreateResponses, unknown, ThrowOnError> => (options.client ?? client).post<CreateResponses, unknown, ThrowOnError>({
+    url: '/api/v1/reservations',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List 30-minute seating slots for a date with availability
+ */
+export const availability = <ThrowOnError extends boolean = false>(options: Options<AvailabilityData, ThrowOnError>): RequestResult<AvailabilityResponses, unknown, ThrowOnError> => (options.client ?? client).get<AvailabilityResponses, unknown, ThrowOnError>({ url: '/api/v1/reservations/availability', ...options });
 
 /**
  * List available menu items, optionally filtered by category
