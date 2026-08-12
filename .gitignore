@@ -13,3 +13,6 @@
 # documented exception and are re-included here)
 *.pem
 !backend/src/main/resources/certs/*.pem
+
+# Firebase deploy cache (local, regenerated each deploy)
+.firebase/
