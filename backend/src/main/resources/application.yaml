@@ -7,6 +7,9 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+  flyway:
+    # Prod runs only real migrations. The local profile adds db/seed (dev admin).
+    locations: classpath:db/migration
   mvc:
     problemdetails:
       enabled: true
@@ -21,6 +24,11 @@ app:
   # The restaurant's business timezone. All "is this slot in the past" logic
   # runs on this zone, never the JVM default (UTC in containers).
   timezone: America/Chicago
+  jwt:
+    # Dev-only keypair, committed on purpose; prod overrides these with
+    # Secret Manager volume mounts (see application-prod.yaml).
+    public-key: classpath:certs/jwt-dev-public.pem
+    private-key: classpath:certs/jwt-dev-private.pem
   reservations:
     tables-per-slot: 10
     slot-minutes: 30

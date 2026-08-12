@@ -1,5 +1,6 @@
 package com.ryanhallberg.restaurant.menu;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ryanhallberg.restaurant.TestcontainersConfiguration;
@@ -21,6 +23,7 @@ import com.ryanhallberg.restaurant.TestcontainersConfiguration;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
+@Transactional // each test rolls back: the container (and its data) is shared across classes
 class MenuApiIntegrationTest {
 
     @Autowired
@@ -68,5 +71,28 @@ class MenuApiIntegrationTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType("application/problem+json"))
                 .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    @org.springframework.security.test.context.support.WithMockUser(roles = "ADMIN")
+    void hiddenItemIs404ForAnonymousButVisibleToAdmin() throws Exception {
+        // Item 1 exists and is available; hide it as admin, then confirm the
+        // public single-item endpoint 404s while an admin can still fetch it.
+        var updateBody = """
+                {"categoryId": 1, "name": "Charred Shishito Peppers", "description": "hidden now",
+                 "priceCents": 900, "imageUrl": null, "available": false}
+                """;
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .put("/api/v1/menu/items/1")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content(updateBody))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/menu/items/1").with(anonymous()))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/v1/menu/items/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(false));
     }
 }

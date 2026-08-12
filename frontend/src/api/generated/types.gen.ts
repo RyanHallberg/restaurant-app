@@ -4,6 +4,36 @@ export type ClientOptions = {
     baseUrl: 'http://localhost:8080' | (string & {});
 };
 
+export type MenuItemRequest = {
+    categoryId: number;
+    name: string;
+    description?: string;
+    priceCents: number;
+    imageUrl?: string;
+    available: boolean;
+};
+
+export type MenuItemResponse = {
+    id?: number;
+    categoryId?: number;
+    name?: string;
+    description?: string;
+    priceCents?: number;
+    imageUrl?: string;
+    available?: boolean;
+};
+
+export type CategoryRequest = {
+    name: string;
+    displayOrder: number;
+};
+
+export type MenuCategoryResponse = {
+    id?: number;
+    name?: string;
+    displayOrder?: number;
+};
+
 export type CreateReservationRequest = {
     customerName: string;
     customerEmail: string;
@@ -23,6 +53,42 @@ export type ReservationResponse = {
     confirmationCode?: string;
 };
 
+export type RegisterRequest = {
+    email: string;
+    password: string;
+    fullName: string;
+};
+
+export type AuthResponse = {
+    token?: string;
+    expiresInSeconds?: number;
+    user?: UserResponse;
+};
+
+export type UserResponse = {
+    id?: number;
+    email?: string;
+    fullName?: string;
+    role?: string;
+};
+
+export type LoginRequest = {
+    email: string;
+    password: string;
+};
+
+export type UpdateReservationStatusRequest = {
+    status: string;
+};
+
+export type PageResponseReservationResponse = {
+    content?: Array<ReservationResponse>;
+    page?: number;
+    size?: number;
+    totalElements?: number;
+    totalPages?: number;
+};
+
 export type AvailabilityResponse = {
     date?: string;
     slots?: Array<SlotResponse>;
@@ -30,16 +96,6 @@ export type AvailabilityResponse = {
 
 export type SlotResponse = {
     time?: string;
-    available?: boolean;
-};
-
-export type MenuItemResponse = {
-    id?: number;
-    categoryId?: number;
-    name?: string;
-    description?: string;
-    priceCents?: number;
-    imageUrl?: string;
     available?: boolean;
 };
 
@@ -51,11 +107,108 @@ export type PageResponseMenuItemResponse = {
     totalPages?: number;
 };
 
-export type MenuCategoryResponse = {
-    id?: number;
-    name?: string;
-    displayOrder?: number;
+export type DeleteItemData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/v1/menu/items/{id}';
 };
+
+export type DeleteItemResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteItemResponse = DeleteItemResponses[keyof DeleteItemResponses];
+
+export type GetItemData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/v1/menu/items/{id}';
+};
+
+export type GetItemResponses = {
+    /**
+     * OK
+     */
+    200: MenuItemResponse;
+};
+
+export type GetItemResponse = GetItemResponses[keyof GetItemResponses];
+
+export type UpdateItemData = {
+    body: MenuItemRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/v1/menu/items/{id}';
+};
+
+export type UpdateItemResponses = {
+    /**
+     * OK
+     */
+    200: MenuItemResponse;
+};
+
+export type UpdateItemResponse = UpdateItemResponses[keyof UpdateItemResponses];
+
+export type UpdateCategoryData = {
+    body: CategoryRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/v1/menu/categories/{id}';
+};
+
+export type UpdateCategoryResponses = {
+    /**
+     * OK
+     */
+    200: MenuCategoryResponse;
+};
+
+export type UpdateCategoryResponse = UpdateCategoryResponses[keyof UpdateCategoryResponses];
+
+export type AdminListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        date?: string;
+        status?: 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+        /**
+         * Zero-based page index (0..N)
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         */
+        size?: number;
+        /**
+         * Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.
+         */
+        sort?: Array<string>;
+    };
+    url: '/api/v1/reservations';
+};
+
+export type AdminListResponses = {
+    /**
+     * OK
+     */
+    200: PageResponseReservationResponse;
+};
+
+export type AdminListResponse = AdminListResponses[keyof AdminListResponses];
 
 export type CreateData = {
     body: CreateReservationRequest;
@@ -73,23 +226,23 @@ export type CreateResponses = {
 
 export type CreateResponse = CreateResponses[keyof CreateResponses];
 
-export type AvailabilityData = {
+export type CancelData = {
     body?: never;
-    path?: never;
-    query: {
-        date: string;
+    path: {
+        id: number;
     };
-    url: '/api/v1/reservations/availability';
+    query?: never;
+    url: '/api/v1/reservations/{id}/cancel';
 };
 
-export type AvailabilityResponses = {
+export type CancelResponses = {
     /**
      * OK
      */
-    200: AvailabilityResponse;
+    200: ReservationResponse;
 };
 
-export type AvailabilityResponse2 = AvailabilityResponses[keyof AvailabilityResponses];
+export type CancelResponse = CancelResponses[keyof CancelResponses];
 
 export type ListItemsData = {
     body?: never;
@@ -121,23 +274,21 @@ export type ListItemsResponses = {
 
 export type ListItemsResponse = ListItemsResponses[keyof ListItemsResponses];
 
-export type GetItemData = {
-    body?: never;
-    path: {
-        id: number;
-    };
+export type CreateItemData = {
+    body: MenuItemRequest;
+    path?: never;
     query?: never;
-    url: '/api/v1/menu/items/{id}';
+    url: '/api/v1/menu/items';
 };
 
-export type GetItemResponses = {
+export type CreateItemResponses = {
     /**
-     * OK
+     * Created
      */
-    200: MenuItemResponse;
+    201: MenuItemResponse;
 };
 
-export type GetItemResponse = GetItemResponses[keyof GetItemResponses];
+export type CreateItemResponse = CreateItemResponses[keyof CreateItemResponses];
 
 export type ListCategoriesData = {
     body?: never;
@@ -154,3 +305,132 @@ export type ListCategoriesResponses = {
 };
 
 export type ListCategoriesResponse = ListCategoriesResponses[keyof ListCategoriesResponses];
+
+export type CreateCategoryData = {
+    body: CategoryRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/menu/categories';
+};
+
+export type CreateCategoryResponses = {
+    /**
+     * Created
+     */
+    201: MenuCategoryResponse;
+};
+
+export type CreateCategoryResponse = CreateCategoryResponses[keyof CreateCategoryResponses];
+
+export type RegisterData = {
+    body: RegisterRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/register';
+};
+
+export type RegisterResponses = {
+    /**
+     * Created
+     */
+    201: AuthResponse;
+};
+
+export type RegisterResponse = RegisterResponses[keyof RegisterResponses];
+
+export type LoginData = {
+    body: LoginRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/login';
+};
+
+export type LoginResponses = {
+    /**
+     * OK
+     */
+    200: AuthResponse;
+};
+
+export type LoginResponse = LoginResponses[keyof LoginResponses];
+
+export type UpdateStatusData = {
+    body: UpdateReservationStatusRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/v1/reservations/{id}/status';
+};
+
+export type UpdateStatusResponses = {
+    /**
+     * OK
+     */
+    200: ReservationResponse;
+};
+
+export type UpdateStatusResponse = UpdateStatusResponses[keyof UpdateStatusResponses];
+
+export type MyReservationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Zero-based page index (0..N)
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         */
+        size?: number;
+        /**
+         * Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.
+         */
+        sort?: Array<string>;
+    };
+    url: '/api/v1/reservations/my';
+};
+
+export type MyReservationsResponses = {
+    /**
+     * OK
+     */
+    200: PageResponseReservationResponse;
+};
+
+export type MyReservationsResponse = MyReservationsResponses[keyof MyReservationsResponses];
+
+export type AvailabilityData = {
+    body?: never;
+    path?: never;
+    query: {
+        date: string;
+    };
+    url: '/api/v1/reservations/availability';
+};
+
+export type AvailabilityResponses = {
+    /**
+     * OK
+     */
+    200: AvailabilityResponse;
+};
+
+export type AvailabilityResponse2 = AvailabilityResponses[keyof AvailabilityResponses];
+
+export type MeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/me';
+};
+
+export type MeResponses = {
+    /**
+     * OK
+     */
+    200: UserResponse;
+};
+
+export type MeResponse = MeResponses[keyof MeResponses];

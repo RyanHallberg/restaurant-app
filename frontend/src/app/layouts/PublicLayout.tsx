@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { NavLink, Outlet, ScrollRestoration, useMatches } from 'react-router'
 import type { RouteHandle } from '../router'
+import { useAuthStore } from '../../features/auth/authStore'
 
 function navClass({ isActive }: { isActive: boolean }) {
   return isActive
@@ -9,6 +10,8 @@ function navClass({ isActive }: { isActive: boolean }) {
 }
 
 export default function PublicLayout() {
+  const user = useAuthStore((state) => state.user)
+  const logout = useAuthStore((state) => state.logout)
   const matches = useMatches()
   const title = matches
     .map((match) => (match.handle as RouteHandle | undefined)?.title)
@@ -39,6 +42,24 @@ export default function PublicLayout() {
             <NavLink to="/about" className={navClass}>
               About
             </NavLink>
+            {user?.role === 'ADMIN' && (
+              <NavLink to="/admin" className={navClass}>
+                Admin
+              </NavLink>
+            )}
+            {user ? (
+              <button
+                type="button"
+                onClick={logout}
+                className="text-charcoal/70 transition-colors hover:text-charcoal"
+              >
+                Sign out
+              </button>
+            ) : (
+              <NavLink to="/login" className={navClass}>
+                Sign in
+              </NavLink>
+            )}
           </nav>
         </div>
       </header>

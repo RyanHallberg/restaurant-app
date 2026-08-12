@@ -68,7 +68,7 @@ class ReservationServiceTest {
     void createRejectsTimesOffTheSlotGrid() {
         var request = request(TOMORROW, LocalTime.of(18, 15));
 
-        assertThatThrownBy(() -> service.create(request))
+        assertThatThrownBy(() -> service.create(request, null))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("not a bookable slot");
     }
@@ -77,7 +77,7 @@ class ReservationServiceTest {
     void createRejectsSlotsInThePast() {
         var request = request(TODAY, LocalTime.of(12, 0));
 
-        assertThatThrownBy(() -> service.create(request))
+        assertThatThrownBy(() -> service.create(request, null))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("already passed");
     }
@@ -87,7 +87,7 @@ class ReservationServiceTest {
         when(repository.countByReservationDateAndReservationTimeAndStatus(
                 TOMORROW, LocalTime.of(19, 0), ReservationStatus.CONFIRMED)).thenReturn(10L);
 
-        assertThatThrownBy(() -> service.create(request(TOMORROW, LocalTime.of(19, 0))))
+        assertThatThrownBy(() -> service.create(request(TOMORROW, LocalTime.of(19, 0)), null))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("No tables left");
     }
@@ -98,7 +98,7 @@ class ReservationServiceTest {
                 TOMORROW, LocalTime.of(19, 0), ReservationStatus.CONFIRMED)).thenReturn(3L);
         when(repository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var response = service.create(request(TOMORROW, LocalTime.of(19, 0)));
+        var response = service.create(request(TOMORROW, LocalTime.of(19, 0)), null);
 
         assertThat(response.confirmationCode()).hasSize(8).matches("[A-Z2-9]+");
         assertThat(response.status()).isEqualTo("CONFIRMED");

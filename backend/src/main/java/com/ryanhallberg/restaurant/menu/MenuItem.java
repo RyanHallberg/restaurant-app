@@ -49,6 +49,26 @@ class MenuItem {
     protected MenuItem() {
     }
 
+    MenuItem(MenuCategory category, String name, String description, int priceCents,
+            String imageUrl, boolean available) {
+        this.category = category;
+        this.name = name;
+        this.description = description;
+        this.priceCents = priceCents;
+        this.imageUrl = imageUrl;
+        this.available = available;
+    }
+
+    void update(MenuCategory category, String name, String description, int priceCents,
+            String imageUrl, boolean available) {
+        this.category = category;
+        this.name = name;
+        this.description = description;
+        this.priceCents = priceCents;
+        this.imageUrl = imageUrl;
+        this.available = available;
+    }
+
     @PrePersist
     void onCreate() {
         createdAt = Instant.now();

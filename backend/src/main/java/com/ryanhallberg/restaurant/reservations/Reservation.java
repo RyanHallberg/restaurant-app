@@ -56,8 +56,9 @@ class Reservation {
     protected Reservation() {
     }
 
-    Reservation(String customerName, String customerEmail, String customerPhone,
+    Reservation(Long userId, String customerName, String customerEmail, String customerPhone,
             int partySize, LocalDate reservationDate, LocalTime reservationTime, String confirmationCode) {
+        this.userId = userId;
         this.customerName = customerName;
         this.customerEmail = customerEmail;
         this.customerPhone = customerPhone;
@@ -74,6 +75,14 @@ class Reservation {
 
     Long getId() {
         return id;
+    }
+
+    Long getUserId() {
+        return userId;
+    }
+
+    void updateStatus(ReservationStatus newStatus) {
+        this.status = newStatus;
     }
 
     String getCustomerName() {

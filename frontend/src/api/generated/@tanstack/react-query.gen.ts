@@ -3,16 +3,16 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { availability, create, getItem, listCategories, listItems, type Options } from '../sdk.gen';
-import type { AvailabilityData, AvailabilityResponse2, CreateData, CreateResponse, GetItemData, GetItemResponse, ListCategoriesData, ListCategoriesResponse, ListItemsData, ListItemsResponse } from '../types.gen';
+import { adminList, availability, cancel, create, createCategory, createItem, deleteItem, getItem, listCategories, listItems, login, me, myReservations, type Options, register, updateCategory, updateItem, updateStatus } from '../sdk.gen';
+import type { AdminListData, AdminListResponse, AvailabilityData, AvailabilityResponse2, CancelData, CancelResponse, CreateCategoryData, CreateCategoryResponse, CreateData, CreateItemData, CreateItemResponse, CreateResponse, DeleteItemData, DeleteItemResponse, GetItemData, GetItemResponse, ListCategoriesData, ListCategoriesResponse, ListItemsData, ListItemsResponse, LoginData, LoginResponse, MeData, MeResponse, MyReservationsData, MyReservationsResponse, RegisterData, RegisterResponse, UpdateCategoryData, UpdateCategoryResponse, UpdateItemData, UpdateItemResponse, UpdateStatusData, UpdateStatusResponse } from '../types.gen';
 
 /**
- * Book a table; returns a confirmation code. 409 when the slot is full
+ * Delete a menu item (admin); prefer toggling available=false to preserve history
  */
-export const createMutation = (options?: Partial<Options<CreateData>>): UseMutationOptions<CreateResponse, DefaultError, Options<CreateData>> => {
-    const mutationOptions: UseMutationOptions<CreateResponse, DefaultError, Options<CreateData>> = {
+export const deleteItemMutation = (options?: Partial<Options<DeleteItemData>>): UseMutationOptions<DeleteItemResponse, DefaultError, Options<DeleteItemData>> => {
+    const mutationOptions: UseMutationOptions<DeleteItemResponse, DefaultError, Options<DeleteItemData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await create({
+            const { data } = await deleteItem({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -56,14 +56,14 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
     return [params];
 };
 
-export const availabilityQueryKey = (options: Options<AvailabilityData>) => createQueryKey('availability', options);
+export const getItemQueryKey = (options: Options<GetItemData>) => createQueryKey('getItem', options);
 
 /**
- * List 30-minute seating slots for a date with availability
+ * Get a single menu item
  */
-export const availabilityOptions = (options: Options<AvailabilityData>) => queryOptions<AvailabilityResponse2, DefaultError, AvailabilityResponse2, ReturnType<typeof availabilityQueryKey>>({
+export const getItemOptions = (options: Options<GetItemData>) => queryOptions<GetItemResponse, DefaultError, GetItemResponse, ReturnType<typeof getItemQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await availability({
+        const { data } = await getItem({
             ...options,
             ...queryKey[0],
             signal,
@@ -71,17 +71,51 @@ export const availabilityOptions = (options: Options<AvailabilityData>) => query
         });
         return data;
     },
-    queryKey: availabilityQueryKey(options)
+    queryKey: getItemQueryKey(options)
 });
 
-export const listItemsQueryKey = (options?: Options<ListItemsData>) => createQueryKey('listItems', options);
+/**
+ * Update a menu item (admin)
+ */
+export const updateItemMutation = (options?: Partial<Options<UpdateItemData>>): UseMutationOptions<UpdateItemResponse, DefaultError, Options<UpdateItemData>> => {
+    const mutationOptions: UseMutationOptions<UpdateItemResponse, DefaultError, Options<UpdateItemData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateItem({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 /**
- * List available menu items, optionally filtered by category
+ * Update a category (admin)
  */
-export const listItemsOptions = (options?: Options<ListItemsData>) => queryOptions<ListItemsResponse, DefaultError, ListItemsResponse, ReturnType<typeof listItemsQueryKey>>({
+export const updateCategoryMutation = (options?: Partial<Options<UpdateCategoryData>>): UseMutationOptions<UpdateCategoryResponse, DefaultError, Options<UpdateCategoryData>> => {
+    const mutationOptions: UseMutationOptions<UpdateCategoryResponse, DefaultError, Options<UpdateCategoryData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateCategory({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const adminListQueryKey = (options?: Options<AdminListData>) => createQueryKey('adminList', options);
+
+/**
+ * List reservations, filterable by date and status (admin)
+ */
+export const adminListOptions = (options?: Options<AdminListData>) => queryOptions<AdminListResponse, DefaultError, AdminListResponse, ReturnType<typeof adminListQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await listItems({
+        const { data } = await adminList({
             ...options,
             ...queryKey[0],
             signal,
@@ -89,7 +123,7 @@ export const listItemsOptions = (options?: Options<ListItemsData>) => queryOptio
         });
         return data;
     },
-    queryKey: listItemsQueryKey(options)
+    queryKey: adminListQueryKey(options)
 });
 
 const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'headers' | 'path' | 'query'>>(queryKey: QueryKey<Options>, page: K) => {
@@ -121,10 +155,92 @@ const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'hea
     return params as unknown as typeof page;
 };
 
+export const adminListInfiniteQueryKey = (options?: Options<AdminListData>): QueryKey<Options<AdminListData>> => createQueryKey('adminList', options, true);
+
+/**
+ * List reservations, filterable by date and status (admin)
+ */
+export const adminListInfiniteOptions = (options?: Options<AdminListData>) => {
+    const opts = infiniteQueryOptions<AdminListResponse, DefaultError, InfiniteData<AdminListResponse>, QueryKey<Options<AdminListData>>, number | Pick<QueryKey<Options<AdminListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<AdminListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await adminList({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: adminListInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Book a table (guests welcome); returns a confirmation code. 409 when the slot is full
+ */
+export const createMutation = (options?: Partial<Options<CreateData>>): UseMutationOptions<CreateResponse, DefaultError, Options<CreateData>> => {
+    const mutationOptions: UseMutationOptions<CreateResponse, DefaultError, Options<CreateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await create({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cancel a reservation (owner or admin)
+ */
+export const cancelMutation = (options?: Partial<Options<CancelData>>): UseMutationOptions<CancelResponse, DefaultError, Options<CancelData>> => {
+    const mutationOptions: UseMutationOptions<CancelResponse, DefaultError, Options<CancelData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await cancel({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listItemsQueryKey = (options?: Options<ListItemsData>) => createQueryKey('listItems', options);
+
+/**
+ * List menu items, optionally filtered by category; admins also see unavailable items
+ */
+export const listItemsOptions = (options?: Options<ListItemsData>) => queryOptions<ListItemsResponse, DefaultError, ListItemsResponse, ReturnType<typeof listItemsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listItems({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listItemsQueryKey(options)
+});
+
 export const listItemsInfiniteQueryKey = (options?: Options<ListItemsData>): QueryKey<Options<ListItemsData>> => createQueryKey('listItems', options, true);
 
 /**
- * List available menu items, optionally filtered by category
+ * List menu items, optionally filtered by category; admins also see unavailable items
  */
 export const listItemsInfiniteOptions = (options?: Options<ListItemsData>) => {
     const opts = infiniteQueryOptions<ListItemsResponse, DefaultError, InfiniteData<ListItemsResponse>, QueryKey<Options<ListItemsData>>, number | Pick<QueryKey<Options<ListItemsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
@@ -151,23 +267,22 @@ export const listItemsInfiniteOptions = (options?: Options<ListItemsData>) => {
     return opts as Omit<typeof opts, 'initialData'>;
 };
 
-export const getItemQueryKey = (options: Options<GetItemData>) => createQueryKey('getItem', options);
-
 /**
- * Get a single menu item
+ * Create a menu item (admin)
  */
-export const getItemOptions = (options: Options<GetItemData>) => queryOptions<GetItemResponse, DefaultError, GetItemResponse, ReturnType<typeof getItemQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getItem({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getItemQueryKey(options)
-});
+export const createItemMutation = (options?: Partial<Options<CreateItemData>>): UseMutationOptions<CreateItemResponse, DefaultError, Options<CreateItemData>> => {
+    const mutationOptions: UseMutationOptions<CreateItemResponse, DefaultError, Options<CreateItemData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createItem({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const listCategoriesQueryKey = (options?: Options<ListCategoriesData>) => createQueryKey('listCategories', options);
 
@@ -185,4 +300,156 @@ export const listCategoriesOptions = (options?: Options<ListCategoriesData>) => 
         return data;
     },
     queryKey: listCategoriesQueryKey(options)
+});
+
+/**
+ * Create a category (admin)
+ */
+export const createCategoryMutation = (options?: Partial<Options<CreateCategoryData>>): UseMutationOptions<CreateCategoryResponse, DefaultError, Options<CreateCategoryData>> => {
+    const mutationOptions: UseMutationOptions<CreateCategoryResponse, DefaultError, Options<CreateCategoryData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createCategory({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Create a customer account; returns a token (auto-login)
+ */
+export const registerMutation = (options?: Partial<Options<RegisterData>>): UseMutationOptions<RegisterResponse, DefaultError, Options<RegisterData>> => {
+    const mutationOptions: UseMutationOptions<RegisterResponse, DefaultError, Options<RegisterData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await register({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Exchange credentials for a bearer token
+ */
+export const loginMutation = (options?: Partial<Options<LoginData>>): UseMutationOptions<LoginResponse, DefaultError, Options<LoginData>> => {
+    const mutationOptions: UseMutationOptions<LoginResponse, DefaultError, Options<LoginData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await login({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Move a confirmed reservation to CANCELLED or COMPLETED (admin)
+ */
+export const updateStatusMutation = (options?: Partial<Options<UpdateStatusData>>): UseMutationOptions<UpdateStatusResponse, DefaultError, Options<UpdateStatusData>> => {
+    const mutationOptions: UseMutationOptions<UpdateStatusResponse, DefaultError, Options<UpdateStatusData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateStatus({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const myReservationsQueryKey = (options?: Options<MyReservationsData>) => createQueryKey('myReservations', options);
+
+/**
+ * The caller's reservations
+ */
+export const myReservationsOptions = (options?: Options<MyReservationsData>) => queryOptions<MyReservationsResponse, DefaultError, MyReservationsResponse, ReturnType<typeof myReservationsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await myReservations({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: myReservationsQueryKey(options)
+});
+
+export const myReservationsInfiniteQueryKey = (options?: Options<MyReservationsData>): QueryKey<Options<MyReservationsData>> => createQueryKey('myReservations', options, true);
+
+/**
+ * The caller's reservations
+ */
+export const myReservationsInfiniteOptions = (options?: Options<MyReservationsData>) => {
+    const opts = infiniteQueryOptions<MyReservationsResponse, DefaultError, InfiniteData<MyReservationsResponse>, QueryKey<Options<MyReservationsData>>, number | Pick<QueryKey<Options<MyReservationsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<MyReservationsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await myReservations({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: myReservationsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+export const availabilityQueryKey = (options: Options<AvailabilityData>) => createQueryKey('availability', options);
+
+/**
+ * List 30-minute seating slots for a date with availability
+ */
+export const availabilityOptions = (options: Options<AvailabilityData>) => queryOptions<AvailabilityResponse2, DefaultError, AvailabilityResponse2, ReturnType<typeof availabilityQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await availability({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: availabilityQueryKey(options)
+});
+
+export const meQueryKey = (options?: Options<MeData>) => createQueryKey('me', options);
+
+/**
+ * The authenticated user's profile
+ */
+export const meOptions = (options?: Options<MeData>) => queryOptions<MeResponse, DefaultError, MeResponse, ReturnType<typeof meQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await me({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: meQueryKey(options)
 });

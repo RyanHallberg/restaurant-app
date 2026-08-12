@@ -1,5 +1,6 @@
 package com.ryanhallberg.restaurant.menu;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,7 +45,8 @@ class MenuControllerTest {
 
     @Test
     void missingItemMapsToProblemDetail404() throws Exception {
-        when(menuService.getItem(anyLong())).thenThrow(new NotFoundException("Menu item 42 not found"));
+        when(menuService.getItem(anyLong(), anyBoolean()))
+                .thenThrow(new NotFoundException("Menu item 42 not found"));
 
         mockMvc.perform(get("/api/v1/menu/items/42"))
                 .andExpect(status().isNotFound())

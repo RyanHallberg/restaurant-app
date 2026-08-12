@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,15 @@ interface ReservationRepository extends JpaRepository<Reservation, Long> {
             LocalDate date, LocalTime time, ReservationStatus status);
 
     List<Reservation> findByReservationDateAndStatus(LocalDate date, ReservationStatus status);
+
+    Page<Reservation> findByUserId(Long userId, Pageable pageable);
+
+    Page<Reservation> findByReservationDate(LocalDate date, Pageable pageable);
+
+    Page<Reservation> findByStatus(ReservationStatus status, Pageable pageable);
+
+    Page<Reservation> findByReservationDateAndStatus(
+            LocalDate date, ReservationStatus status, Pageable pageable);
 
     /**
      * Serializes concurrent bookings for the same slot within their

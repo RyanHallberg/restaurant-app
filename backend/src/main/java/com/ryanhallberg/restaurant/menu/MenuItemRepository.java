@@ -9,4 +9,6 @@ interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
     Page<MenuItem> findByAvailableTrue(Pageable pageable);
 
     Page<MenuItem> findByAvailableTrueAndCategoryId(Long categoryId, Pageable pageable);
+
+    Page<MenuItem> findByCategoryId(Long categoryId, Pageable pageable);
 }

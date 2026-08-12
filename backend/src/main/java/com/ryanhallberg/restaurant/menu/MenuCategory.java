@@ -24,6 +24,16 @@ class MenuCategory {
     protected MenuCategory() {
     }
 
+    MenuCategory(String name, int displayOrder) {
+        this.name = name;
+        this.displayOrder = displayOrder;
+    }
+
+    void update(String name, int displayOrder) {
+        this.name = name;
+        this.displayOrder = displayOrder;
+    }
+
     Long getId() {
         return id;
     }
