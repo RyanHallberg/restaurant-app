@@ -1,0 +1,15 @@
+# OS / editor
+.DS_Store
+.idea/
+*.iml
+.vscode/
+
+# env files — commit .env.example only
+.env
+.env.local
+.env.*.local
+
+# secrets (dev-only JWT certs under backend/src/main/resources/certs/ are the
+# documented exception and are re-included here)
+*.pem
+!backend/src/main/resources/certs/*.pem

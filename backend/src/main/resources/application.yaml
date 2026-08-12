@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: restaurant-api
+  profiles:
+    default: local
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+app:
+  reservations:
+    tables-per-slot: 10
+    slot-minutes: 30
+    opening-time: "11:00"
+    closing-time: "22:00"
