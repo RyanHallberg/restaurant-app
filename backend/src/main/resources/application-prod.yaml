@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    # Cloud SQL Java Connector: no IP allowlisting, TLS handled by the
+    # connector, IAM enforced via the runtime service account's
+    # roles/cloudsql.client. Mandatory pattern for Java per Google docs.
+    url: jdbc:postgresql:///${DB_NAME}?cloudSqlInstance=${CLOUDSQL_INSTANCE}&socketFactory=com.google.cloud.sql.postgres.SocketFactory
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
