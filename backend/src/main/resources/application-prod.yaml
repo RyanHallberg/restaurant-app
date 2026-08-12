@@ -12,6 +12,7 @@ app:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
   jwt:
     # Secret Manager volume mounts: PEMs as files, never through env vars
-    # (newlines get mangled).
-    public-key: file:/secrets/jwt-public.pem
-    private-key: file:/secrets/jwt-private.pem
+    # (newlines get mangled). Each secret needs its own directory — Cloud Run
+    # rejects two different secrets mounted into the same folder.
+    public-key: file:/secrets/jwt-public/key.pem
+    private-key: file:/secrets/jwt-private/key.pem
